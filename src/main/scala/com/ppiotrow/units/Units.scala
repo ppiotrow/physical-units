@@ -12,7 +12,7 @@ trait ComplexUnit[N, D]
 
 case class Units[Nominator <: HList, Denominator <: HList](value: BigDecimal) {
   def +(other: Units[Nominator, Denominator]) = Units[Nominator, Denominator](this.value + other.value)
-  
+
   def -(other: Units[Nominator, Denominator]) = Units[Nominator, Denominator](this.value - other.value)
 
   def *[N2 <: HList, D2 <: HList, SN <: HList, SD <: HList, CN <: HList, CD <: HList](other: Units[N2, D2])(
@@ -29,12 +29,14 @@ case class Units[Nominator <: HList, Denominator <: HList](value: BigDecimal) {
 
 }
 
+private [units] class Unitable(val i: BigDecimal) extends AnyVal {
+  def as[U <: BasicUnit] = new Units[U :: HNil, HNil](i)
+  def as[N <: HList, D <: HList](b: ComplexUnit[N, D]) = new Units[N, D](i)
+  def scalar = new Units[HNil, HNil](i)
+}
+
 private[units] trait UnitConversions {
-  class Unitable(i: BigDecimal) {
-    def as[U <: BasicUnit] = new Units[U :: HNil, HNil](i)
-    def as[N <: HList, D <: HList](b: ComplexUnit[N, D]) = new Units[N, D](i)
-    def scalar = new Units[HNil, HNil](i)
-  }
+
   implicit def toUnit(i: BigDecimal): Unitable = new Unitable(i)
   implicit def toUnit(i: Int): Unitable = new Unitable(i)
   implicit def toUnit(i: Long): Unitable = new Unitable(i)
